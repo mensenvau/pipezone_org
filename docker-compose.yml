@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  spark-master:
+    image: bitnami/spark:latest
+    container_name: spark-master
+    hostname: spark-master
+    ports:
+      - "8080:8080" # Spark Web UI
+      - "7077:7077" # Spark Master Port
+    environment:
+      - SPARK_MODE=master
+    volumes:
+      - ./workspace:/opt/spark/workspace # Shared workspace folder
+      - ./shared:/opt/spark/shared # Shared folder
+
+  spark-worker:
+    image: bitnami/spark:latest
+    depends_on:
+      - spark-master
+    deploy:
+      replicas: 2 # Change this number for dynamic workers
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    volumes:
+      - ./workspace:/opt/spark/workspace # Shared workspace folder
+      - ./shared:/opt/spark/shared # Shared folder
+
+  jupyter:
+    image: jupyter/pyspark-notebook:latest
+    container_name: jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./workspace:/home/jovyan/work # Shared workspace folder
+      - ./shared:/home/jovyan/shared # Shared folder
+    environment:
+      - PYSPARK_MASTER=spark://spark-master:7077
+      - JUPYTER_ENABLE_LAB=yes
+    command: ["start-notebook.sh", "--NotebookApp.token=''", "--NotebookApp.password=''"]
+    entrypoint: ["sh", "-c", "echo '%load_ext sql\n%sql spark' >> /home/jovyan/.jupyter/jupyter_notebook_config.py && start-notebook.sh"]
