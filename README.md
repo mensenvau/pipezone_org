@@ -10,6 +10,10 @@
 - **SQL Magic**: Run SQL queries directly within Jupyter (`%sql` support)
 - **One-Command Setup**: Deploy everything using `docker-compose`
 
+### 📺 System Architecture
+
+![Docker Setup](images/Docker.png)
+
 ### 📦 Installation
 
 #### Prerequisites
@@ -43,21 +47,23 @@ docker-compose up -d
 
 > **Note:** By default, Jupyter runs without authentication. If it's not accessible, check the Docker log for the authentication token URL.
 
-### 📜 Usage
+### 📂 Shared Workspace
+
+![Folder Structure](images/Folder.png)
+
+### 📝 Usage
 
 #### Running a Simple Spark Job
 
 Inside Jupyter, open a new Python notebook and run:
 
 ```python
-from pyspark.sql import SparkSession
+# Set up Spark environment
+from spark_utils import get_spark
 
-spark = SparkSession.builder.appName("Pipezone").getOrCreate()
-
-data = [("Alice", 29), ("Bob", 35), ("Catherine", 27)]
-df = spark.createDataFrame(data, ["Name", "Age"])
-
-df.show()
+spark = get_spark()
+df = spark.read.csv("/home/jovyan/shared/data.csv", header=True)
+df.toPandas().head(4)  # You can also use df.show() without converting
 ```
 
 #### Running SQL Queries
@@ -69,7 +75,11 @@ df.show()
 %sql SELECT * FROM df
 ```
 
-### 🛑 Stopping and Removing Containers
+### 📓 Jupyter Notebook Example
+
+![Notebook Example](images/Notebook.png)
+
+### 🚫 Stopping and Removing Containers
 
 To stop all running containers:
 
@@ -91,7 +101,7 @@ docker-compose down -v
 4. Push to the branch (`git push origin feature-branch`)
 5. Open a Pull Request
 
-### 📜 License
+### 📝 License
 
 This project is licensed under the MIT License. See `LICENSE` for details.
 
