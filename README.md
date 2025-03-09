@@ -41,7 +41,7 @@ docker-compose up -d
 | **Spark UI** | [127.0.0.1:8080](http://127.0.0.1:8080) |
 | **Jupyter**  | [127.0.0.1:8888](http://127.0.0.1:8888) |
 
-> **Note:** Jupyter runs with no authentication by default.
+> **Note:** By default, Jupyter runs without authentication. If it's not accessible, check the Docker log for the authentication token URL.
 
 ### 📜 Usage
 
