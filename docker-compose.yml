@@ -33,7 +33,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./workspace:/home/jovyan/work # Shared workspace folder
+      - ./workspace:/home/jovyan/workspace # Shared workspace folder
       - ./shared:/home/jovyan/shared # Shared folder
     environment:
       - PYSPARK_MASTER=spark://spark-master:7077

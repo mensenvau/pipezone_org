@@ -1,6 +1,6 @@
-## 🚀 PipeZone Org
+## 🚀 Pipezone
 
-**PipeZone Org** is a lightweight, scalable, and fully containerized data processing environment. It provides an easy-to-use Apache Spark setup with dynamic worker scaling, Jupyter Notebook for interactive development, and shared storage for seamless data access.
+**Pipezone** is a lightweight, scalable, and fully containerized data processing environment. It provides an easy-to-use Apache Spark setup with dynamic worker scaling, Jupyter Notebook for interactive development, and shared storage for seamless data access.
 
 ### 📌 Features
 
@@ -38,8 +38,8 @@ docker-compose up -d
 
 | Service      | URL                                     |
 | ------------ | --------------------------------------- |
-| **Spark UI** | [localhost:8080](http://localhost:8080) |
-| **Jupyter**  | [localhost:8888](http://localhost:8888) |
+| **Spark UI** | [127.0.0.1:8080](http://127.0.0.1:8080) |
+| **Jupyter**  | [127.0.0.1:8888](http://127.0.0.1:8888) |
 
 > **Note:** Jupyter runs with no authentication by default.
 
@@ -52,7 +52,7 @@ Inside Jupyter, open a new Python notebook and run:
 ```python
 from pyspark.sql import SparkSession
 
-spark = SparkSession.builder.appName("PipeZone").getOrCreate()
+spark = SparkSession.builder.appName("Pipezone").getOrCreate()
 
 data = [("Alice", 29), ("Bob", 35), ("Catherine", 27)]
 df = spark.createDataFrame(data, ["Name", "Age"])
@@ -97,4 +97,4 @@ This project is licensed under the MIT License. See `LICENSE` for details.
 
 ---
 
-🚀 **PipeZone Org** - Simplifying Big Data Processing!
+🚀 **PipeZone** - Simplifying Big Data Processing!
