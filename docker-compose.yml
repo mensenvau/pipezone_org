@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   spark-master:
     image: bitnami/spark:latest
@@ -11,7 +9,7 @@ services:
     environment:
       - SPARK_MODE=master
     volumes:
-      - ./workspace:/opt/spark/workspace # Shared workspace folder
+      - ./work:/opt/spark/work # Shared work folder
       - ./shared:/opt/spark/shared # Shared folder
 
   spark-worker:
@@ -24,7 +22,7 @@ services:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
     volumes:
-      - ./workspace:/opt/spark/workspace # Shared workspace folder
+      - ./work:/opt/spark/work # Shared work folder
       - ./shared:/opt/spark/shared # Shared folder
 
   jupyter:
@@ -33,10 +31,10 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./workspace:/home/jovyan/workspace # Shared workspace folder
+      - ./work:/home/jovyan/work # Shared work folder
       - ./shared:/home/jovyan/shared # Shared folder
     environment:
       - PYSPARK_MASTER=spark://spark-master:7077
       - JUPYTER_ENABLE_LAB=yes
-    command: ["start-notebook.sh", "--NotebookApp.token=''", "--NotebookApp.password=''"]
-    entrypoint: ["sh", "-c", "echo '%load_ext sql\n%sql spark' >> /home/jovyan/.jupyter/jupyter_notebook_config.py && start-notebook.sh"]
+    command: >
+      sh -c "pip install --no-cache-dir pyspark pandas numpy matplotlib ipywidgets && jupyter lab --LabApp.token=''"
