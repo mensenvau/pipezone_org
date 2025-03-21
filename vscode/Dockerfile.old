@@ -1,0 +1,76 @@
+FROM codercom/code-server:latest
+
+# Set environment variables
+ENV HOME=/home/coder
+ENV USER=coder
+ENV PATH="/opt/venv/bin:$PATH"
+ENV DEFAULT_WORKSPACE_DIR="/home/coder/workspace"
+
+# Ensure the workspace directory exists
+RUN mkdir -p $DEFAULT_WORKSPACE_DIR && chown -R coder:coder $DEFAULT_WORKSPACE_DIR
+
+# Install necessary VS Code extensions
+RUN code-server --install-extension zhuangtongfa.material-theme && \
+    code-server --install-extension pkief.material-icon-theme && \
+    code-server --install-extension ms-python.python && \
+    code-server --install-extension ms-toolsai.jupyter && \
+    code-server --install-extension ms-azuretools.vscode-docker
+
+# Install necessary system tools
+USER root
+RUN apt update && apt install -y python3 python3-venv python3-pip curl sudo
+
+# Create a virtual environment for Python packages
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip && \
+    /opt/venv/bin/pip install jupyterlab numpy pandas matplotlib seaborn scikit-learn pyspark
+
+# Change ownership of the virtual environment to allow user installation
+RUN chown -R coder:coder /opt/venv
+
+# Ensure Jupyter Notebook is properly configured
+RUN mkdir -p /home/coder/.jupyter && \
+    echo '{  \
+        "NotebookApp": { \
+            "ip": "0.0.0.0", \
+            "allow_origin": "*", \
+            "port": 8888, \
+            "open_browser": false, \
+            "token": "", \
+            "password": "" \
+            "notebook_dir": "/home/coder/workspace" \
+        } \
+    }' > /home/coder/.jupyter/jupyter_notebook_config.json
+
+# Preconfigure VS Code settings
+RUN mkdir -p /home/coder/.local/share/code-server/User && \
+    echo '{ \ 
+        "workbench.colorTheme": "One Dark Pro", \
+        "workbench.iconTheme": "material-icon-theme", \ 
+        "files.autoSave": "afterDelay", \ 
+        "editor.fontSize": 14, \ 
+        "window.zoomLevel": 1, \ 
+        "python.defaultInterpreterPath": "/opt/venv/bin/python3", \ 
+        "jupyter.jupyterServerType": "local", \ 
+        "jupyter.interactiveWindowMode": "perFile", \ 
+        "jupyter.alwaysTrustNotebooks": true, \ 
+        "window.restoreWindows": "preserve",\ 
+        "workbench.startupEditor": "none"\ 
+    }' > /home/coder/.local/share/code-server/User/settings.json
+
+# Grant sudo privileges to the user without a password
+RUN echo "coder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Set permissions
+RUN chown -R coder:coder /home/coder
+
+# user
+USER coder
+
+# Expose ports
+EXPOSE 8080 8888
+
+# Start both Jupyter and code-server
+CMD ["sh", "-c", "mkdir -p /home/coder/workspace && \
+    jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root & \
+    code-server --bind-addr 0.0.0.0:8080 --user-data-dir /home/coder/.local/share/code-server --auth none /home/coder/workspace"]

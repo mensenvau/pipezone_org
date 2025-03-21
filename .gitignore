@@ -1,2 +1,11 @@
+# files
 .DS_Store
 .env
+.venv
+
+# folders
+.vscode
+node_modules
+dist
+coverage
+config

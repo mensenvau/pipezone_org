@@ -4,37 +4,48 @@ services:
     container_name: spark-master
     hostname: spark-master
     ports:
-      - "8080:8080" # Spark Web UI
-      - "7077:7077" # Spark Master Port
+      - "8080:8080"
+      - "7077:7077"
     environment:
       - SPARK_MODE=master
     volumes:
-      - ./work:/opt/spark/work # Shared work folder
-      - ./shared:/opt/spark/shared # Shared folder
+      - ./workspace:/opt/spark/workspace
+      - ./shared:/opt/spark/shared
+    networks:
+      - my_network
 
   spark-worker:
     image: bitnami/spark:latest
     depends_on:
       - spark-master
     deploy:
-      replicas: 2 # Change this number for dynamic workers
+      replicas: 2
     environment:
       - SPARK_MODE=worker
       - SPARK_MASTER_URL=spark://spark-master:7077
     volumes:
-      - ./work:/opt/spark/work # Shared work folder
-      - ./shared:/opt/spark/shared # Shared folder
+      - ./workspace:/opt/spark/workspace
+      - ./shared:/opt/spark/shared
+    networks:
+      - my_network
 
-  jupyter:
-    image: jupyter/pyspark-notebook:latest
-    container_name: jupyter
+  vscode:
+    build: ./vscode
+    container_name: vscode
+    restart: always
     ports:
-      - "8888:8888"
+      - "9000:9000" # Code-Server (VS Code in browser)
+      - "9001:9001" # Jupyter Notebook
     volumes:
-      - ./work:/home/jovyan/work # Shared work folder
-      - ./shared:/home/jovyan/shared # Shared folder
+      - ./shared:/home/coder/workspace/shared
+      - ./workspace:/home/coder/workspace
     environment:
-      - PYSPARK_MASTER=spark://spark-master:7077
-      - JUPYTER_ENABLE_LAB=yes
-    command: >
-      sh -c "pip install --no-cache-dir pyspark pandas numpy matplotlib ipywidgets && jupyter lab --LabApp.token=''"
+      - PASSWORD=@mensenvau!12345 # password
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    networks:
+      - my_network
+
+networks:
+  my_network: # Umumiy tarmoq
+    driver: bridge
